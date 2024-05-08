@@ -115,25 +115,46 @@
     <h1>Carer Login</h1>
 
     <?php
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        if (isset($_POST["login_as"]) && $_POST["login_as"] == "carer") {
+$error_message = "";
 
-            if (isset($_POST["email"]) && isset($_POST["password"])) {
-                $email = $_POST["email"];
-                $password = $_POST["password"];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST["login_as"]) && $_POST["login_as"] == "carer") {
+        if (isset($_POST["email"]) && isset($_POST["password"])) {
+            $email = $_POST["email"];
+            $password = $_POST["password"];
 
-                if ($email == "carer_email@example.com" && $password == "carer_password") {
-                    header("Location: carer_page.php");
-                    exit();
+            $mysqli = mysqli_connect("localhost", "2110047", "Will@7419156123", "db2110047");
+
+            if (mysqli_connect_errno()) {
+                $error_message = "Failed to connect to MySQL: " . mysqli_connect_error();
+            } else {
+                $query = "SELECT * FROM carer_credentials WHERE email = ? LIMIT 1";
+                $stmt = mysqli_prepare($mysqli, $query);
+                mysqli_stmt_bind_param($stmt, "s", $email);
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
+
+                if (mysqli_num_rows($result) == 1) {
+                    $row = mysqli_fetch_assoc($result);
+                    if (password_verify($password, $row['password'])) {
+                        header("Location: carer_page.php");
+                        exit();
+                    } else {
+                        $error_message = "Invalid email or password";
+                    }
                 } else {
                     $error_message = "Invalid email or password";
                 }
-            } else {
-                $error_message = "Please enter both email and password";
+
+                mysqli_stmt_close($stmt);
+                mysqli_close($mysqli);
             }
+        } else {
+            $error_message = "Please enter both email and password";
         }
     }
-    ?>
+}
+?>
 
     <?php
     if (isset($error_message)) {

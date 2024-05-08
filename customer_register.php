@@ -1,9 +1,49 @@
+<?php
+$error_message = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST["login_as"]) && $_POST["login_as"] == "customer") {
+        if (isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["phonenumb"])) {
+            $email = $_POST["email"];
+            $password = $_POST["password"];
+            $phone = $_POST["phonenumb"];
+
+            $mysqli = mysqli_connect("localhost", "2110047", "Will@7419156123", "db2110047");
+
+            if (mysqli_connect_errno()) {
+                $error_message = "Failed to connect to MySQL: " . mysqli_connect_error();
+            } else {
+                $query = "INSERT INTO Cuslog (email, password, phonenumb) VALUES (?, ?, ?)";
+                
+                $stmt = mysqli_prepare($mysqli, $query);
+                
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                
+                mysqli_stmt_bind_param($stmt, "sss", $email, $hashed_password, $phone);
+                $result = mysqli_stmt_execute($stmt);
+
+                if ($result) {
+                    header("Location: customer_login.php");
+                    exit();
+                } else {
+                    $error_message = "Registration failed";
+                }
+
+                mysqli_stmt_close($stmt);
+                mysqli_close($mysqli);
+            }
+        } else {
+            $error_message = "Please enter email, password, and phone number";
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer login</title>
+    <title>Customer Registration</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -49,25 +89,6 @@
             margin-right: 0;
         }
 
-        .info {
-            background-color: #fff;
-            border: 1px solid #ccc;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 40px;
-            text-align: left;
-        }
-
-        .info h2 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .info p {
-            color: #666;
-            line-height: 1.6;
-        }
-
         form {
             max-width: 400px;
             margin: 0 auto;
@@ -110,71 +131,31 @@
     </style>
 </head>
 <body>
-
     <div class="container">
-        <h1>Customer Login</h1>
+        <h1>Customer Registration</h1>
 
         <?php
-$error_message = "";
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST["login_as"]) && $_POST["login_as"] == "customer") {
-        if (isset($_POST["email"]) && isset($_POST["password"])) {
-            $email = $_POST["email"];
-            $password = $_POST["password"];
-
-            $mysqli = mysqli_connect("localhost", "2110047", "Will@7419156123", "db2110047");
-
-            if (mysqli_connect_errno()) {
-                $error_message = "Failed to connect to MySQL: " . mysqli_connect_error();
-            } else {
-                $query = "SELECT * FROM cuslog WHERE email = ? LIMIT 1";
-                $stmt = mysqli_prepare($mysqli, $query);
-                mysqli_stmt_bind_param($stmt, "s", $email);
-                mysqli_stmt_execute($stmt);
-                $result = mysqli_stmt_get_result($stmt);
-
-                if (mysqli_num_rows($result) == 1) {
-                    $row = mysqli_fetch_assoc($result);
-                    if ($password == $row['password']) { 
-                        header("Location: customer_page.php");
-                        exit();
-                    } else {
-                        $error_message = "Invalid email or password";
-                    }
-                } else {
-                    $error_message = "Invalid email or password";
-                }
-
-                mysqli_stmt_close($stmt);
-                mysqli_close($mysqli);
-            }
-        } else {
-            $error_message = "Please enter both email and password";
-        }
-    }
-}
-?>
-
-        <?php
-        if (isset($error_message)) {
+        if (!empty($error_message)) {
             echo "<p class='error-message'>$error_message</p>";
         }
         ?>
 
-         <form action="customer_login.php" method="post">
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <label for="email">Email:</label>
             <input type="text" name="email" required>
             <br>
             <label for="password">Password:</label>
             <input type="password" name="password" required>
             <br>
-            <button type="submit" name="login_as" value="customer">Login</button>
+            <label for="phonenumb">Phone Number:</label>
+            <input type="text" name="phonenumb" required>
+            <br>
+            <button type="submit" name="login_as" value="customer">Register</button>
         </form>
 
         <div class="button-container">
-        <button onclick="window.location.href='customer_register.php'" class="button">Register</button>
+            <button onclick="window.location.href='customer_login.php'" class="button">Back to Login</button>
+        </div>
     </div>
-</div>
 </body>
 </html>
