@@ -128,7 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (mysqli_connect_errno()) {
                 $error_message = "Failed to connect to MySQL: " . mysqli_connect_error();
             } else {
-                $query = "SELECT * FROM carer_credentials WHERE email = ? LIMIT 1";
+                $query = "SELECT * FROM Carerlog WHERE email = ? LIMIT 1";
                 $stmt = mysqli_prepare($mysqli, $query);
                 mysqli_stmt_bind_param($stmt, "s", $email);
                 mysqli_stmt_execute($stmt);

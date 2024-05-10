@@ -13,14 +13,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (mysqli_connect_errno()) {
                 $error_message = "Failed to connect to MySQL: " . mysqli_connect_error();
             } else {
-                $query = "INSERT INTO carerlog (email, password, phonenumb) VALUES (?, ?, ?)";
+                $query = "INSERT INTO Carerlog (email, password, phonenumb) VALUES (?, ?, ?)";
                 
                 $stmt = mysqli_prepare($mysqli, $query);
                 
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                 
                 mysqli_stmt_bind_param($stmt, "sss", $email, $hashed_password, $phone);
-                $result = mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_execute($stmt);  
 
                 if ($result) {
                     header("Location: carer_login.php");

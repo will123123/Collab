@@ -58,7 +58,7 @@
         if (mysqli_connect_errno()) {
             echo "Failed to connect to MySQL: " . mysqli_connect_error();
         } else {
-            $query = "SELECT * FROM cuslog";
+            $query = "SELECT * FROM Cuslog";
             $result = mysqli_query($mysqli, $query);
 
             if (mysqli_num_rows($result) > 0) {
